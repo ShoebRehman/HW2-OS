@@ -8,16 +8,11 @@
 #include 	<unistd.h>       
 #include	<stdio.h>
 #include	<math.h>
-#include	<pthread.h>
 #define 	KFOUR 4096
 
-struct releasepids{
-	int* loc; 
-	int* pidnum;
-};
 
-int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct releasepids args);
-void *release_pid(void* arguments);
+int allocate_pid(char* addr, int size, int walkno);
+void release_pid(int* loc, int pidnum);
 
 int main(argc, argv)
 	int	argc;
@@ -25,10 +20,7 @@ int main(argc, argv)
 	{
 	int i,  *pint,  shmkey ;
 	char *addr;
-	
 	int walkno, start,shmid,  matsize ;
-	pthread_t threads[matsize];
-	struct releasepids args;
 	/* get parms*/
 	walkno=atoi(argv[1]);
 	start=atoi(argv[2]);
@@ -44,9 +36,8 @@ int main(argc, argv)
         while(*pint > start)
 		pint=(int *)addr;
 
-	
-	allocate_pid(pint, matsize, walkno, &threads, args);	
-	
+	allocate_pid(addr, matsize, walkno);
+
 /*print out state of array*/
 	/*pint=(int *)addr;
 	printf( "child %d pint %d *pint %d\n",walkno, pint, *pint);
@@ -60,11 +51,9 @@ int main(argc, argv)
 	*/
 } /* end of main*/                  
 
-int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct releasepids args){
+int allocate_pid(char* addr, int size, int walkno){
 	int *baseAdd;	
 	baseAdd =(int *)addr;
-	args.pidnum = size; 
-
 	printf("Child %d is waiting for a PID...\n\t", walkno+1);	
 	for(int i = 1; i < size+1; i++){
 		if(*baseAdd != 0){
@@ -74,22 +63,18 @@ int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct r
 		if(*baseAdd == 0){
 			printf("Child %d took PID %d\n", walkno+1, i); 
 			*baseAdd = walkno+1;
-			args.loc = baseAdd;			
-			pthread_create(&threads[i], NULL, release_pid, (void *) &args);
-			printf("asdsa\n\n");
-			pthread_join(threads[i], NULL);
+			release_pid(baseAdd, walkno+1);
 			return 0;
 		}
 	}
 	return 1;
 }
 
-void *release_pid(void* arguments){
-	struct releasepids *args = (struct releasepids *)arguments;
-	int* addr = args->loc;
+void release_pid(int* loc, int pidnum){
+	int* addr = loc;
 	srand(time(NULL));
 	sleep(rand() % 5);
-	printf("Child %d has been released\n", *args->pidnum); 
+	printf("Child %d has been released\n", pidnum); 
 	*addr = 0;
 }
 
