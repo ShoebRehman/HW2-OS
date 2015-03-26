@@ -76,7 +76,7 @@ int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct r
 			*baseAdd = walkno+1;
 			args.loc = baseAdd;			
 			pthread_create(&threads[i], NULL, release_pid, (void *) &args);
-			printf("asdsa\n\n");
+			printf("Child %d has been released\n", i);
 			pthread_join(threads[i], NULL);
 			return 0;
 		}
