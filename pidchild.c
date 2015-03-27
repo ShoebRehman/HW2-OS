@@ -16,7 +16,7 @@ struct releasepids{
 	int* pidnum;
 };
 
-int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct releasepids args);
+int allocate_pid(char* addr, int size, int walkno, struct releasepids args);
 void *release_pid(void* arguments);
 
 int main(argc, argv)
@@ -44,8 +44,16 @@ int main(argc, argv)
         while(*pint > start)
 		pint=(int *)addr;
 
+	args.pidnum = matsize;
+	 
 	
-	allocate_pid(pint, matsize, walkno, &threads, args);	
+	allocate_pid(pint, matsize, walkno, args);	
+	srand(time(NULL));
+	sleep(rand()%10);
+	pthread_create(&threads[i], NULL, release_pid, (void *) &args);
+	printf("Child %d has been released\n", i);
+	pthread_join(threads[i], NULL);
+	
 	
 /*print out state of array*/
 	/*pint=(int *)addr;
@@ -60,10 +68,9 @@ int main(argc, argv)
 	*/
 } /* end of main*/                  
 
-int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct releasepids args){
+int allocate_pid(char* addr, int size, int walkno, struct releasepids args){
 	int *baseAdd;	
 	baseAdd =(int *)addr;
-	args.pidnum = size; 
 
 	printf("Child %d is waiting for a PID...\n\t", walkno+1);	
 	for(int i = 1; i < size+1; i++){
@@ -74,10 +81,7 @@ int allocate_pid(char* addr, int size, int walkno, pthread_t threads[], struct r
 		if(*baseAdd == 0){
 			printf("Child %d took PID %d\n", walkno+1, i); 
 			*baseAdd = walkno+1;
-			args.loc = baseAdd;			
-			pthread_create(&threads[i], NULL, release_pid, (void *) &args);
-			printf("Child %d has been released\n", i);
-			pthread_join(threads[i], NULL);
+			args.loc = baseAdd;
 			return 0;
 		}
 	}
