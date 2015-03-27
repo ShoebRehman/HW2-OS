@@ -14,6 +14,7 @@ void release_pid(int pidnum);
 void *threadCreate(int number);
 
 char *addr;
+int* baseAdd;
 int *pint;
 int start;
 
@@ -44,6 +45,7 @@ char	*argv[];
 	addr = shmat(shmid, 0, 0);
 	printf("Starting at Memory Location: 0x%x\n", addr);
 	pint = (int *)addr;
+
 	printf("Initializing Shared Memory...\n");
 	for (i = 0; i<matsize; i++)  {
 		pint++;
@@ -68,13 +70,14 @@ char	*argv[];
 
 void *threadCreate(int number){
 	int pid;
-	pint=(int *)addr;
-    while(*pint > start)
-		pint=(int *)addr;
 	
+	pint=(int *)addr;
+    while(*pint > start){
+		pint=(int *)addr;
+	}
 	pid = allocate_pid(number);
 	
-	sleep(rand()%10);
+	sleep(rand() % 5);
 	
 	release_pid(pid);
 	
@@ -82,21 +85,20 @@ void *threadCreate(int number){
 
 int allocate_pid(int number){
 	int *baseAdd;	
-	baseAdd =(int *)addr;
+	baseAdd = (int *)addr;
 	
 	printf("Child %d is waiting for a PID...\n\t", number+1);	
-	for(int i = 1; i < matsize+1; i++){
+	for(int i = 0; i < matsize; i++){
 		if(*baseAdd != 0){
 			baseAdd++;
 		}		
 
 		if(*baseAdd == 0){
-			printf("Child %d took PID %d\n", number+1 , i); 
+			printf("Child %d took PID %d\n", number+1 , i+1); 
 			*baseAdd = number+1;
 			return i;
 		}
 	}
-	return -1;
 }
 
 void release_pid(int pidnum){
