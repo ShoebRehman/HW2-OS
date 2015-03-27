@@ -38,6 +38,7 @@ int main(argc, argv)
 	/*set up shared memory*/
 	shmid=shmget(shmkey, KFOUR, 0777);
 	addr=shmat(shmid,0,0);
+	printf("asdasda\n\n\n");
 
 /*wait for block on the first memory location to be cleared*/
 	pint=(int *)addr;
@@ -45,8 +46,6 @@ int main(argc, argv)
 		pint=(int *)addr;
 
 	args.pidnum = walkno+1;
- 	printf("sadsadasD\n\n");	
-
 	
 	allocate_pid(pint, matsize, walkno, args);	
 	srand(time(NULL));
