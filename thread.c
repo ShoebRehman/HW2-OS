@@ -9,15 +9,20 @@
 #define	KEY 75
 #define KFOUR  4096
 
+int allocate_pid(int nunber);
+void release_pid(int pidnum);
+
+char *addr;
+int *pint;
+
 int 		shmid; 	/*for external cleanup routine*/
 int		matsize;
 int main(argc, argv)
 int	argc;
 char	*argv[];
 {
-	int i, j, k, m, n, *pint, shmkey, offset;
+	int i, j, k, m, n, shmkey, offset;
 	int status = 0;
-	char *addr;
 	int  walkers, walkpid, next, start;
 	char thisstart[10];
 	char thiswalkno[10];
@@ -47,34 +52,12 @@ char	*argv[];
 		*pint = 0;
 	}
 	printf("Done.\n");
-	/* now create walkers*/
-	printf("Forking Children...\n");
-	for (m = 0; m<matsize; m++){
-		switch (walkpid = fork()) {
-		case -1:  {
-			perror("bad fork");
-			exit(0);
-		}
-		case 0: {
-			sprintf(thiswalkno, "%d", m);
-			sprintf(thisstart, "%d", start);
-			sprintf(thismatsize, "%d", matsize);
-			sprintf(thisshmkey, "%d", shmkey);
-			execlp
-				(argv[3], "pidchild",
-				thiswalkno,
-				thisstart,
-				thismatsize,
-				thisshmkey,
-				NULL);
-		}
-		default: {
-			printf("Child %d sucessfully forked, waiting for start.\n", m + 1);
-		}
-		} /*end switch*/
-	}/* end create walkers loop*/
-	/* now signal to start*/
-
+	
+	for(long int j = 0; j < matsize; j++){
+		pthread_t thread;
+		pthread_create(&thread, NULL, thread, (void *) j);
+	}
+	
 	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
@@ -82,3 +65,40 @@ char	*argv[];
 	printf("All children released successfully.\n");
 } /* end of main*/
 
+void thread(int number){
+	pint=(int *)addr;
+    while(*pint > start)
+		pint=(int *)addr;
+	
+	int pid = allocate_pid(number);
+	sleep(rand()%10);
+	release_pid(pid);
+}
+
+int allocate_pid(int number){
+	int *baseAdd;	
+	baseAdd =(int *)addr;
+	
+	printf("Child %d is waiting for a PID...\n\t", number+1);	
+	for(int i = 1; i < size+1; i++){
+		if(*baseAdd != 0){
+			baseAdd++;
+		}		
+
+		if(*baseAdd == 0){
+			printf("Child %d took PID %d\n", number+1 , i); 
+			*baseAdd = number+1;
+			return i;
+		}
+	}
+}
+
+void release_pid(int pidnum){
+	int childNum;
+	int *baseAdd;	
+	baseAdd =(int *)addr;
+	baseAdd+=pidnum;
+	childNum = *baseAdd;
+	printf("Child %d has been released\n", childNum+1); 
+	*addr = 0;
+}
