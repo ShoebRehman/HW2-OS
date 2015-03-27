@@ -14,6 +14,8 @@
 struct releasepids{
 	int* loc; 
 	int* pidnum;
+	char* addr;
+	int* size;
 };
 
 int allocate_pid(char* addr, int size, int walkno, struct releasepids args);
@@ -27,7 +29,6 @@ int main(argc, argv)
 	char *addr;
 	
 	int walkno, start,shmid,  matsize ;
-	pthread_t threads[matsize];
 	struct releasepids args;
 	/* get parms*/
 	walkno=atoi(argv[1]);
@@ -36,39 +37,29 @@ int main(argc, argv)
 	shmkey=atoi(argv[4]);
 
 	/*set up shared memory*/
-	shmid=shmget(shmkey, KFOUR, 0777);
-	addr=shmat(shmid,0,0);
-	printf("asdasda\n\n\n");
-
+	
 /*wait for block on the first memory location to be cleared*/
 	pint=(int *)addr;
         while(*pint > start)
 		pint=(int *)addr;
 
 	args.pidnum = walkno+1;
+	args.addr = addr;
+	*args.size = matsize;
 	
-	allocate_pid(pint, matsize, walkno, args);	
-	srand(time(NULL));
-	sleep(rand()%10);
-	pthread_create(&threads[walkno], NULL, release_pid, (void *) &args);
-	printf("Child %d has been released\n", i);
-	pthread_join(threads[walkno], NULL);
-	
-	
-/*print out state of array*/
-	/*pint=(int *)addr;
-	printf( "child %d pint %d *pint %d\n",walkno, pint, *pint);
-	for(i=0; i<matsize; i++){
-		pint++;
-		printf("%d\t", *pint);
-		}
-		printf("\n");
-	printf ("child %d exiting \n", walkno+1);	
-	return(0);
-	*/
+	for(int j = 0; j < matsize; j++){
+		pthread_create(NULL, NULL, thread, (void *) args);
+	}
 } /* end of main*/                  
 
-int allocate_pid(char* addr, int size, int walkno, struct releasepids args){
+void thread(void* arguments){
+	struct releasepids *args = (struct releasepids *)arguments;
+	allocate_pid(args->addr, args->size, args->pidnum);
+	sleep(rand()%10);
+	release_pid(
+}
+
+int allocate_pid(char* addr, int size, int walkno){
 	int *baseAdd;	
 	baseAdd =(int *)addr;
 
@@ -81,16 +72,16 @@ int allocate_pid(char* addr, int size, int walkno, struct releasepids args){
 		if(*baseAdd == 0){
 			printf("Child %d took PID %d\n", walkno+1, i); 
 			*baseAdd = walkno+1;
-			args.loc = baseAdd;
 			return 0;
 		}
 	}
 	return 1;
 }
 
-void *release_pid(void* arguments){
-	struct releasepids *args = (struct releasepids *)arguments;
-	int* addr = args->loc;
+void *release_pid(char* addr, ){
+	int *baseAdd;	
+	baseAdd =(int *)addr;
+
 	srand(time(NULL));
 	sleep(rand() % 5);
 	printf("Child %d has been released\n", *args->pidnum); 
