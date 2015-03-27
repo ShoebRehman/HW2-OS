@@ -69,17 +69,18 @@ char	*argv[];
 } /* end of main*/
 
 void *threadCreate(int number){
-	int pid;
+	int pid = 0;
 	
 	pint=(int *)addr;
     while(*pint > start){
 		pint=(int *)addr;
 	}
+	
 	pid = allocate_pid(number);
 	
-	sleep(rand() % 5);
+	//sleep(rand() % 5);
 	
-	release_pid(pid);
+	//release_pid(pid);
 	
 }
 
