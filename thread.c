@@ -11,6 +11,7 @@
 
 int allocate_pid(int nunber);
 void release_pid(int pidnum);
+void *thread(int number);
 
 char *addr;
 int *pint;
@@ -52,26 +53,29 @@ char	*argv[];
 	
 	pthread_t thread[matsize];
 	
-	for(long int j = 0; j < matsize; j++){
-		pthread_create(&thread[j], NULL, thread, (void *) j+1);
+	for(long int j = 1; j < matsize+1; j++){
+		pthread_create(&thread[j], NULL, &thread, (void *) j+1);
 	}
 	
 	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
 	
+	for(int j = 1; j < matsize+1; j++){
+		pthread_join(&thread[j], NULL);
+	}
 	/*wait for children to complete then terminate*/
 	while ((wpid = wait(&status))>0);
 	printf("All children released successfully.\n");
 	return 0;
 } /* end of main*/
 
-void thread(int number){
-	
+void *thread(int number){
+	int pid;
 	pint=(int *)addr;
     while(*pint > start)
 		pint=(int *)addr;
 	
-	int pid = allocate_pid(number);
+	pid = allocate_pid(number);
 	sleep(rand()%10);
 	release_pid(pid);
 }
@@ -102,5 +106,5 @@ void release_pid(int pidnum){
 	baseAdd+=pidnum;
 	childNum = *baseAdd;
 	printf("Child %d has been released\n", childNum+1); 
-	*addr = 0;
+	*baseAdd = 0;
 }
