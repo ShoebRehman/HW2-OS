@@ -1,6 +1,6 @@
 all:
-	gcc -std=c99 -lm -pthread pidparent.c -o pidparent.exe
+	gcc -std=c99 -lm -pthread thread.c -o thread.exe
 	
 clean:
-	rm pidparent.exe
+	rm thread.exe
 

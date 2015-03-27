@@ -14,6 +14,7 @@ void release_pid(int pidnum);
 
 char *addr;
 int *pint;
+int start;
 
 int 		shmid; 	/*for external cleanup routine*/
 int		matsize;
@@ -23,18 +24,14 @@ char	*argv[];
 {
 	int i, j, k, m, n, shmkey, offset;
 	int status = 0;
-	int  walkers, walkpid, next, start;
-	char thisstart[10];
-	char thiswalkno[10];
-	char thismatsize[10];
-	char thisshmkey[10];
+	int  walkers, walkpid, next;
 	pid_t wpid;
 
 	printf("Shoeb Rehman - 23018971\n\n");
 	/* start processing with test of args*/
 	if (argc<4)
 	{
-		perror("Not enough parameters:  basename, matsize, pidchild location, start");
+		perror("Not enough parameters:  basename, matsize, start");
 		exit(0);
 	}
 	/* get parms*/
@@ -80,7 +77,7 @@ int allocate_pid(int number){
 	baseAdd =(int *)addr;
 	
 	printf("Child %d is waiting for a PID...\n\t", number+1);	
-	for(int i = 1; i < size+1; i++){
+	for(int i = 1; i < matsize+1; i++){
 		if(*baseAdd != 0){
 			baseAdd++;
 		}		
