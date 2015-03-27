@@ -44,8 +44,9 @@ int main(argc, argv)
         while(*pint > start)
 		pint=(int *)addr;
 
-	args.pidnum = matsize;
-	 
+	args.pidnum = walkno+1;
+ 	printf("sadsadasD\n\n");	
+
 	
 	allocate_pid(pint, matsize, walkno, args);	
 	srand(time(NULL));
