@@ -50,9 +50,9 @@ int main(argc, argv)
 	allocate_pid(pint, matsize, walkno, args);	
 	srand(time(NULL));
 	sleep(rand()%10);
-	pthread_create(&threads[i], NULL, release_pid, (void *) &args);
+	pthread_create(&threads[walkno], NULL, release_pid, (void *) &args);
 	printf("Child %d has been released\n", i);
-	pthread_join(threads[i], NULL);
+	pthread_join(threads[walkno], NULL);
 	
 	
 /*print out state of array*/
