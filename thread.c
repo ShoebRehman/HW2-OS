@@ -18,20 +18,20 @@ int start;
 
 int 		shmid; 	/*for external cleanup routine*/
 int		matsize;
+
 int main(argc, argv)
 int	argc;
 char	*argv[];
 {
-	int i, j, k, m, n, shmkey, offset;
+	int i, shmkey;
 	int status = 0;
-	int  walkers, walkpid, next;
 	pid_t wpid;
 
 	printf("Shoeb Rehman - 23018971\n\n");
 	/* start processing with test of args*/
-	if (argc<4)
+	if (argc<2)
 	{
-		perror("Not enough parameters:  basename, matsize, start");
+		perror("Not enough parameters: matsize, start");
 		exit(0);
 	}
 	/* get parms*/
@@ -50,19 +50,23 @@ char	*argv[];
 	}
 	printf("Done.\n");
 	
+	pthread_t thread[matsize];
+	
 	for(long int j = 0; j < matsize; j++){
-		pthread_t thread;
-		pthread_create(&thread, NULL, thread, (void *) j);
+		pthread_create(&thread[j], NULL, thread, (void *) j+1);
 	}
 	
 	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
+	
 	/*wait for children to complete then terminate*/
 	while ((wpid = wait(&status))>0);
 	printf("All children released successfully.\n");
+	return 0;
 } /* end of main*/
 
 void thread(int number){
+	
 	pint=(int *)addr;
     while(*pint > start)
 		pint=(int *)addr;
@@ -88,6 +92,7 @@ int allocate_pid(int number){
 			return i;
 		}
 	}
+	return -1;
 }
 
 void release_pid(int pidnum){
