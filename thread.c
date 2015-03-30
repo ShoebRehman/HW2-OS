@@ -75,7 +75,6 @@ void *threadCreate(int number){
     while(*pint > start){
 		pint=(int *)addr;
 	}
-	
 	pid = allocate_pid(number);
 	
 	//sleep(rand() % 5);
