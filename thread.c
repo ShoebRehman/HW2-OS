@@ -9,9 +9,10 @@
 #define	KEY 75
 #define KFOUR  4096
 
-int allocate_pid(int nunber);
+int allocate_pid(int number);
 void release_pid(int pidnum);
 void *threadCreate(int number);
+
 
 char *addr;
 int* baseAdd;
@@ -56,6 +57,7 @@ char	*argv[];
 	pthread_t thread;
 	
 	for(long int j = 0; j < matsize; j++){
+		//allocate_pid(j);
 		pthread_create(&thread, NULL, threadCreate, (void *) j);
 	}
 	
@@ -69,7 +71,7 @@ char	*argv[];
 } /* end of main*/
 
 void *threadCreate(int number){
-	int pid = 0;
+	int pid;
 	
 	pint=(int *)addr;
     while(*pint > start){
@@ -84,20 +86,20 @@ void *threadCreate(int number){
 }
 
 int allocate_pid(int number){
-	int *baseAdd;	
 	baseAdd = (int *)addr;
 	
 	printf("Child %d is waiting for a PID...\n\t", number+1);	
-	for(int i = 0; i < matsize; i++){
+	for(int i = 0; i < matsize+1; i++){
 		if(*baseAdd != 0){
 			baseAdd++;
 		}		
-
-		if(*baseAdd == 0){
-			printf("Child %d took PID %d\n", number+1 , i+1); 
+		else if(*baseAdd == 0){
+			printf("Child %d took PID %d\n", number+1 , i); 
 			*baseAdd = number+1;
 			return i;
 		}
+		
+		
 	}
 }
 
