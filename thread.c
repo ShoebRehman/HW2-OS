@@ -63,15 +63,18 @@ char	*argv[];
 	
 	for(long int j = 0; j < matsize; j++){
 		data.childNum = j;
-		pthread_create(&thread[j], NULL, threadCreate, &data);
+		allocate_pid(j);
+		//pthread_create(&thread[j], NULL, threadCreate, &data);
 	}
+
+	
 
 	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
 	
 	for(int k = 0; k < matsize; k++){
-		pthread_join(thread[k], NULL);
+		//pthread_join(thread[k], NULL);
 	}
 
 	printf("All children released successfully.\n");
@@ -87,6 +90,7 @@ void threadCreate(void *ptr){
 		pint=(int *)addr;
 		
 	pid = allocate_pid(data->childNum);
+	
 	sleep(rand() % 5);
 	
 	release_pid(pid);
