@@ -81,14 +81,12 @@ char	*argv[];
 void threadCreate(void *ptr){
 	thrdat *data = (thrdat *)ptr;
 	int pid;
-
+	
 	pint=(int *)addr;
-	while(*pint > start){
+        while(*pint > start)
 		pint=(int *)addr;
-	}
-	
+		
 	pid = allocate_pid(data->childNum);
-	
 	sleep(rand() % 5);
 	
 	release_pid(pid);
