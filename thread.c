@@ -9,9 +9,13 @@
 #define	KEY 75
 #define KFOUR  4096
 
+typedef struct threadData{
+	int childNum;	
+}thrdat;
+
 int allocate_pid(int number);
 void release_pid(int pidnum);
-void *threadCreate(int number);
+void threadCreate(void *ptr);
 
 
 char *addr;
@@ -55,12 +59,14 @@ char	*argv[];
 	printf("Done.\n");
 	
 	pthread_t thread;
+	thrdat data;
 	
 	for(long int j = 0; j < matsize; j++){
-		//allocate_pid(j);
-		pthread_create(&thread, NULL, threadCreate, (void *) j);
+		data.childNum = j;
+		allocate_pid(j);
+		//pthread_create(&thread, NULL, (void *) &threadCreate, (void *) &data);
 	}
-	
+
 	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
 	
@@ -70,19 +76,21 @@ char	*argv[];
 	return 0;
 } /* end of main*/
 
-void *threadCreate(int number){
+void threadCreate(void *ptr){
 	int pid;
-	
+	thrdat *data;
+	data = (thrdat*) ptr;
+
 	pint=(int *)addr;
-    while(*pint > start){
+	while(*pint > start){
 		pint=(int *)addr;
 	}
-	pid = allocate_pid(number);
+	pid = allocate_pid(data->childNum);
 	
 	//sleep(rand() % 5);
 	
 	//release_pid(pid);
-	
+	//pthread_exit(0);
 }
 
 int allocate_pid(int number){
