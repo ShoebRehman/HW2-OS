@@ -58,39 +58,41 @@ char	*argv[];
 	}
 	printf("Done.\n");
 	
-	pthread_t thread;
+	pthread_t thread[matsize];
 	thrdat data;
 	
 	for(long int j = 0; j < matsize; j++){
 		data.childNum = j;
-		allocate_pid(j);
-		//pthread_create(&thread, NULL, (void *) &threadCreate, (void *) &data);
+		pthread_create(&thread[j], NULL, threadCreate, &data);
 	}
 
 	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
-	
 	/*wait for children to complete then terminate*/
-	while ((wpid = wait(&status))>0);
+	
+	for(int k = 0; k < matsize; k++){
+		pthread_join(thread[k], NULL);
+	}
+
 	printf("All children released successfully.\n");
 	return 0;
 } /* end of main*/
 
 void threadCreate(void *ptr){
+	thrdat *data = (thrdat *)ptr;
 	int pid;
-	thrdat *data;
-	data = (thrdat*) ptr;
 
 	pint=(int *)addr;
 	while(*pint > start){
 		pint=(int *)addr;
 	}
+	
 	pid = allocate_pid(data->childNum);
 	
-	//sleep(rand() % 5);
+	sleep(rand() % 5);
 	
-	//release_pid(pid);
-	//pthread_exit(0);
+	release_pid(pid);
+	pthread_exit(NULL);
 }
 
 int allocate_pid(int number){
@@ -101,7 +103,8 @@ int allocate_pid(int number){
 		if(*baseAdd != 0){
 			baseAdd++;
 		}		
-		else if(*baseAdd == 0){
+		
+		if(*baseAdd == 0){
 			printf("Child %d took PID %d\n", number+1 , i); 
 			*baseAdd = number+1;
 			return i;
