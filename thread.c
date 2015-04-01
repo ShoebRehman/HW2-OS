@@ -66,7 +66,7 @@ char	*argv[];
 		allocate_pid(j);
 		//pthread_create(&thread[j], NULL, threadCreate, &data);
 	}
-
+	print();
 	
 
 	pint = (int *)addr;
@@ -91,10 +91,10 @@ void threadCreate(void *ptr){
 		
 	pid = allocate_pid(data->childNum);
 	
-	sleep(rand() % 5);
+	//sleep(rand() % 5);
 	
-	release_pid(pid);
-	pthread_exit(NULL);
+	//release_pid(pid);
+	//pthread_exit(NULL);
 }
 
 int allocate_pid(int number){
@@ -124,4 +124,15 @@ void release_pid(int pidnum){
 	childNum = *baseAdd;
 	printf("Child %d has been released\n", childNum+1); 
 	*baseAdd = 0;
+}
+
+void print(){
+	pint=(int *)addr;
+	int i;
+	for (i=0; i<matsize; i++){
+		pint++;
+		printf("%d\t", *pint);
+		}
+	printf("\n");
+	printf( "child %d pint %d *pint %d\n", i, pint, *pint);
 }
