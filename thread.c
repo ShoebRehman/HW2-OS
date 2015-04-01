@@ -69,12 +69,12 @@ char	*argv[];
 	
 	sleep(2);
 
+	/*waits for all threads to finish task*/
 	for(long int j = 0; j < matsize; j++){
 		pthread_join(&thread[j], NULL);
-		sleep(3);
 	}
 
-	printf("All threads terminated successfully.\n");
+	printf("All threads executed successfully.\n");
 	return 0;
 } /* end of main*/
 
@@ -84,26 +84,33 @@ void *threadCreate(int childNum){
 	while(*pint != start){
 		pint=(int *)addr;
 	}
-	
+	/*Acquire Lock*/
 	pthread_mutex_lock(&mut);
+	
 	pid = allocate_pid(childNum);
+	
+	/*Release Lock*/
 	pthread_mutex_unlock(&mut);
 	
 	srand(time(NULL));
-	sleep(rand()%10);
+	sleep(rand()%10 + 5);
 	
+	
+	/*Acquire Lock*/
 	pthread_mutex_lock(&mut);
+	sleep(3);
 	release_pid(pid);
-	sleep((rand()% 2) + 1);
-
-	pthread_mutex_unlock(&mut);
 	
-	pthread_exit(NULL);
+	/*Release Lock*/
+	pthread_mutex_unlock(&mut);	
+	
+	
+	
+	pthread_exit(0);
 }
 
 int allocate_pid(int number){
 	baseAdd = (int *)addr;
-	
 	printf("Child %d is waiting for a PID...\n\t", number+1);	
 	for(int i = 0; i < matsize+1; i++){
 		if(*baseAdd != 0){
@@ -122,12 +129,13 @@ int allocate_pid(int number){
 
 void release_pid(int pidnum){
 	int childNum;
-	int *baseAdd;	
+	int *baseAdd;
 	baseAdd =(int *)addr;
 	baseAdd+=pidnum;
 	childNum = *baseAdd;
-	printf("Child %d has been released\n", childNum+1); 
+	printf("Child %d has been released\n", childNum); 
 	*baseAdd = 0;
+	sleep((rand()% 2) + 1);
 }
 
 void print(){
