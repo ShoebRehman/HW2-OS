@@ -15,7 +15,7 @@ typedef struct threadData{
 
 int allocate_pid(int number);
 void release_pid(int pidnum);
-void threadCreate(void *ptr);
+void *threadCreate(void *ptr);
 
 
 char *addr;
@@ -63,8 +63,8 @@ char	*argv[];
 	
 	for(long int j = 0; j < matsize; j++){
 		data.childNum = j;
-		allocate_pid(j);
-		//pthread_create(&thread[j], NULL, threadCreate, &data);
+		//allocate_pid(j);
+		pthread_create(&thread[j], NULL, threadCreate, &data);
 	}
 	print();
 	
@@ -81,14 +81,14 @@ char	*argv[];
 	return 0;
 } /* end of main*/
 
-void threadCreate(void *ptr){
+void *threadCreate(void *ptr){
 	thrdat *data = (thrdat *)ptr;
 	int pid;
 	
 	pint=(int *)addr;
         while(*pint > start)
 		pint=(int *)addr;
-		
+	
 	pid = allocate_pid(data->childNum);
 	
 	//sleep(rand() % 5);
@@ -107,7 +107,7 @@ int allocate_pid(int number){
 		}		
 		
 		if(*baseAdd == 0){
-			printf("Child %d took PID %d\n", number+1 , i); 
+			printf("Child %d took PID %d\n", number+1 , i+1); 
 			*baseAdd = number+1;
 			return i;
 		}
@@ -134,5 +134,4 @@ void print(){
 		printf("%d\t", *pint);
 		}
 	printf("\n");
-	printf( "child %d pint %d *pint %d\n", i, pint, *pint);
 }
