@@ -6,6 +6,7 @@
 #include	<stdio.h>
 #include	<unistd.h>
 #include 	<stdlib.h>
+#include 	<pthread.h>
 #define	KEY 75
 #define KFOUR  4096
 
@@ -16,6 +17,7 @@ typedef struct threadData{
 int allocate_pid(int number);
 void release_pid(int pidnum);
 void *threadCreate(void *ptr);
+void print();
 
 
 char *addr;
@@ -58,20 +60,20 @@ char	*argv[];
 	}
 	printf("Done.\n");
 	
-	pthread_t thread[matsize];
+	pthread_t thread;
 	thrdat data;
 	
 	for(long int j = 0; j < matsize; j++){
 		data.childNum = j;
-		//allocate_pid(j);
-		pthread_create(&thread[j], NULL, threadCreate, &data);
+		pthread_create(&thread, NULL, threadCreate, &data);
+		//pthread_join(&thread, NULL);
+		sleep(rand()%2);
 	}
-	print();
 	
-
-	pint = (int *)addr;
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
+	
+	print();
 	
 	for(int k = 0; k < matsize; k++){
 		//pthread_join(thread[k], NULL);
@@ -85,16 +87,16 @@ void *threadCreate(void *ptr){
 	thrdat *data = (thrdat *)ptr;
 	int pid;
 	
-	pint=(int *)addr;
-        while(*pint > start)
+	while(*pint != start){
 		pint=(int *)addr;
-	
+	}
+
 	pid = allocate_pid(data->childNum);
-	
+
 	//sleep(rand() % 5);
 	
 	//release_pid(pid);
-	//pthread_exit(NULL);
+	pthread_exit(NULL);
 }
 
 int allocate_pid(int number){
