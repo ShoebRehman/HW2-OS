@@ -10,13 +10,9 @@
 #define	KEY 75
 #define KFOUR  4096
 
-typedef struct threadData{
-	int childNum;	
-}thrdat;
-
 int allocate_pid(int number);
 void release_pid(int pidnum);
-void *threadCreate(void *ptr);
+void *threadCreate(int pid);
 void print();
 
 
@@ -60,42 +56,36 @@ char	*argv[];
 	}
 	printf("Done.\n");
 	
-	pthread_t thread;
-	thrdat data;
+	pthread_t thread[matsize];
 	
 	for(long int j = 0; j < matsize; j++){
-		data.childNum = j;
-		pthread_create(&thread, NULL, threadCreate, &data);
-		//pthread_join(&thread, NULL);
-		sleep(rand()%2);
+		pthread_create(&thread[j], NULL, threadCreate, (void *)j);
+		sleep(rand() % 2);
 	}
 	
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
 	
 	print();
-	
-	for(int k = 0; k < matsize; k++){
-		//pthread_join(thread[k], NULL);
-	}
 
 	printf("All children released successfully.\n");
 	return 0;
 } /* end of main*/
 
-void *threadCreate(void *ptr){
-	thrdat *data = (thrdat *)ptr;
+void *threadCreate(int childNum){
 	int pid;
 	
 	while(*pint != start){
 		pint=(int *)addr;
 	}
 
-	pid = allocate_pid(data->childNum);
-
-	//sleep(rand() % 5);
+	pid = allocate_pid(childNum);
 	
-	//release_pid(pid);
+	//srand(time(NULL));
+	//sleep( rand()%10 + 5 );
+	
+	release_pid(pid);
+	
 	pthread_exit(NULL);
 }
 
