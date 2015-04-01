@@ -39,7 +39,7 @@ int main(argc, argv)
 	allocate_pid(addr, matsize, walkno);
 
 /*print out state of array*/
-	/*pint=(int *)addr;
+	pint=(int *)addr;
 	printf( "child %d pint %d *pint %d\n",walkno, pint, *pint);
 	for(i=0; i<matsize; i++){
 		pint++;
@@ -48,7 +48,6 @@ int main(argc, argv)
 		printf("\n");
 	printf ("child %d exiting \n", walkno+1);	
 	return(0);
-	*/
 } /* end of main*/                  
 
 int allocate_pid(char* addr, int size, int walkno){
