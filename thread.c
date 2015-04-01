@@ -23,6 +23,7 @@ int start;
 
 int 		shmid; 	/*for external cleanup routine*/
 int		matsize;
+pthread_mutex_t mut;
 
 int main(argc, argv)
 int	argc;
@@ -66,9 +67,14 @@ char	*argv[];
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
 	
-	print();
+	sleep(2);
 
-	printf("All children released successfully.\n");
+	for(long int j = 0; j < matsize; j++){
+		pthread_join(&thread[j], NULL);
+		sleep(3);
+	}
+
+	printf("All threads terminated successfully.\n");
 	return 0;
 } /* end of main*/
 
@@ -78,13 +84,19 @@ void *threadCreate(int childNum){
 	while(*pint != start){
 		pint=(int *)addr;
 	}
-
+	
+	pthread_mutex_lock(&mut);
 	pid = allocate_pid(childNum);
+	pthread_mutex_unlock(&mut);
 	
-	//srand(time(NULL));
-	//sleep( rand()%10 + 5 );
+	srand(time(NULL));
+	sleep(rand()%10);
 	
+	pthread_mutex_lock(&mut);
 	release_pid(pid);
+	sleep((rand()% 2) + 1);
+
+	pthread_mutex_unlock(&mut);
 	
 	pthread_exit(NULL);
 }
