@@ -129,7 +129,7 @@ char* memInit(int key){
 		pint++;
 		*pint = 0;
 	}
-	printf("Done.\n");
+	printf("Done.\n\n");
 	
 	return addr;
 }
