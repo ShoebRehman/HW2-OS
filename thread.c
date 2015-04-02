@@ -17,7 +17,6 @@ void print();
 
 
 char *addr;
-int* baseAdd;
 int *pint;
 int start;
 
@@ -61,19 +60,17 @@ char	*argv[];
 	
 	for(long int j = 0; j < matsize; j++){
 		pthread_create(&thread[j], NULL, threadCreate, (void *)j);
-		sleep(rand() % 2);
+		printf("Thread %d created, waiting for start\n", j+1);	
+
 	}
 	
+	printf("\nStarting Threads\n\n");	
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
 	
 	sleep(2);
 
-	/*waits for all threads to finish task*/
-	for(long int j = 0; j < matsize; j++){
-		pthread_join(&thread[j], NULL);
-	}
-
+	pthread_exit(NULL);
 	printf("All threads executed successfully.\n");
 	return 0;
 } /* end of main*/
@@ -84,58 +81,51 @@ void *threadCreate(int childNum){
 	while(*pint != start){
 		pint=(int *)addr;
 	}
+	
 	/*Acquire Lock*/
-	pthread_mutex_lock(&mut);
+	//pthread_mutex_lock(&mut);
 	
 	pid = allocate_pid(childNum);
 	
 	/*Release Lock*/
-	pthread_mutex_unlock(&mut);
+	//pthread_mutex_unlock(&mut);
 	
-	srand(time(NULL));
-	sleep(rand()%10 + 5);
+	sleep(rand() % 5);
 	
 	
 	/*Acquire Lock*/
-	pthread_mutex_lock(&mut);
-	sleep(3);
+	//pthread_mutex_lock(&mut);
+
 	release_pid(pid);
 	
 	/*Release Lock*/
-	pthread_mutex_unlock(&mut);	
-	
-	
-	
-	pthread_exit(0);
+	//pthread_mutex_unlock(&mut);	
 }
 
 int allocate_pid(int number){
+	int* baseAdd;
 	baseAdd = (int *)addr;
-	printf("Child %d is waiting for a PID...\n\t", number+1);	
+	printf("Thread %d is waiting for a PID...\n\t", number+1);	
 	for(int i = 0; i < matsize+1; i++){
-		if(*baseAdd != 0){
-			baseAdd++;
-		}		
-		
 		if(*baseAdd == 0){
-			printf("Child %d took PID %d\n", number+1 , i+1); 
+			printf("Thread %d took PID %d\n", number+1 , i+1); 
 			*baseAdd = number+1;
-			return i;
+			return i+1;
 		}
-		
-		
+		baseAdd++;
 	}
 }
 
 void release_pid(int pidnum){
 	int childNum;
-	int *baseAdd;
-	baseAdd =(int *)addr;
-	baseAdd+=pidnum;
-	childNum = *baseAdd;
-	printf("Child %d has been released\n", childNum); 
-	*baseAdd = 0;
-	sleep((rand()% 2) + 1);
+	int* baseAddr;
+	baseAddr =(int *)addr;
+	baseAddr+=pidnum;
+	baseAddr--;
+	childNum = *baseAddr;
+	printf("Thread %d has released PID %d successfully\n", childNum, pidnum); 
+	*baseAddr = 0;
+
 }
 
 void print(){
