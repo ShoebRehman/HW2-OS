@@ -31,7 +31,7 @@ char	*argv[];
 	int i, shmkey;
 	int status = 0;
 	pid_t wpid;
-
+	
 	printf("Shoeb Rehman - 23018971\n\n");
 	/* start processing with test of args*/
 	if (argc<2)
@@ -68,7 +68,7 @@ char	*argv[];
 	*pint = atoi(argv[2]); /* restore true start*/
 	/*wait for children to complete then terminate*/
 	
-	sleep(2);
+	//sleep(2);
 
 	pthread_exit(NULL);
 	printf("All threads executed successfully.\n");
@@ -79,27 +79,26 @@ void *threadCreate(int childNum){
 	int pid;
 	
 	while(*pint != start){
-		pint=(int *)addr;
 	}
 	
 	/*Acquire Lock*/
-	//pthread_mutex_lock(&mut);
+	pthread_mutex_lock(&mut);
 	
 	pid = allocate_pid(childNum);
 	
 	/*Release Lock*/
-	//pthread_mutex_unlock(&mut);
+	pthread_mutex_unlock(&mut);
 	
 	sleep(rand() % 5);
 	
 	
 	/*Acquire Lock*/
-	//pthread_mutex_lock(&mut);
+	pthread_mutex_lock(&mut);
 
 	release_pid(pid);
 	
 	/*Release Lock*/
-	//pthread_mutex_unlock(&mut);	
+	pthread_mutex_unlock(&mut);	
 }
 
 int allocate_pid(int number){
