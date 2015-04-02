@@ -11,10 +11,11 @@
 #define KFOUR  4096
 
 int allocate_pid(int number);
+char* memInit(int shmkey);
 void release_pid(int pidnum);
 void *threadCreate(int pid);
 void print();
-
+void threadExec();
 
 char *addr;
 int *pint;
@@ -27,12 +28,7 @@ pthread_mutex_t mut;
 int main(argc, argv)
 int	argc;
 char	*argv[];
-{
-	int i, shmkey;
-	int status = 0;
-	pid_t wpid;
-	
-	printf("Shoeb Rehman - 23018971\n\n");
+{	
 	/* start processing with test of args*/
 	if (argc<2)
 	{
@@ -42,35 +38,18 @@ char	*argv[];
 	/* get parms*/
 	matsize = atoi(argv[1]);
 	start = atoi(argv[2]);
-	shmkey = KEY;
-	/*set up shared memory*/
-	shmid = shmget(shmkey, KFOUR, 0777 | IPC_CREAT);
-	addr = shmat(shmid, 0, 0);
-	printf("Starting at Memory Location: 0x%x\n", addr);
-	pint = (int *)addr;
+	
 
-	printf("Initializing Shared Memory...\n");
-	for (i = 0; i<matsize; i++)  {
-		pint++;
-		*pint = 0;
-	}
-	printf("Done.\n");
-	
-	pthread_t thread[matsize];
-	
-	for(long int j = 0; j < matsize; j++){
-		pthread_create(&thread[j], NULL, threadCreate, (void *)j);
-		printf("Thread %d created, waiting for start\n", j+1);	
+	addr = memInit(KEY); //initializes shared memory segment and returns base address
+	threadExec(); //creation of threads, must wait for start
 
-	}
-	
-	printf("\nStarting Threads\n\n");	
-	*pint = atoi(argv[2]); /* restore true start*/
-	/*wait for children to complete then terminate*/
-	
-	//sleep(2);
+	printf("\n\tStarting Threads\n\n");	
 
-	pthread_exit(NULL);
+	*pint = atoi(argv[2]); /*Starts threads*/
+	
+	
+
+	pthread_exit(NULL);//Waits for threads to finish
 	printf("All threads executed successfully.\n");
 	return 0;
 } /* end of main*/
@@ -124,7 +103,6 @@ void release_pid(int pidnum){
 	childNum = *baseAddr;
 	printf("Thread %d has released PID %d successfully\n", childNum, pidnum); 
 	*baseAddr = 0;
-
 }
 
 void print(){
@@ -135,4 +113,31 @@ void print(){
 		printf("%d\t", *pint);
 		}
 	printf("\n");
+}
+
+char* memInit(int key){
+	printf("Shoeb Rehman - 23018971\n\n");
+	shmid = shmget(key, KFOUR, 0777 | IPC_CREAT);
+	addr = shmat(shmid, 0, 0);
+	
+
+	printf("Starting at Memory Location: 0x%x\n", addr);
+	pint = (int *)addr;
+
+	printf("Initializing Shared Memory...\n");
+	for (int i = 0; i<matsize; i++)  {
+		pint++;
+		*pint = 0;
+	}
+	printf("Done.\n");
+	
+	return addr;
+}
+
+void threadExec(){
+	pthread_t thread[matsize];
+	for(long int j = 0; j < matsize; j++){
+		pthread_create(&thread[j], NULL, threadCreate, (void *)j);
+		printf("Thread %d created, waiting for start\n", j+1);	
+	}
 }
